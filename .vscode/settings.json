@@ -3,5 +3,10 @@
         "editor.wordBasedSuggestions": "off",
         "editor.suggest.insertMode": "replace",
         "editor.semanticHighlighting.enabled": true,
+    },
+    "files.associations": {
+        "coroutine": "cpp",
+        "xmemory": "cpp",
+        "initializer_list": "cpp"
     }
 }

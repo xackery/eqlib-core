@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <VcpkgRoot>C:\vcpkg</VcpkgRoot>
+    <VcpkgEnabled>true</VcpkgEnabled>
+    <VcpkgTriplet>x86-windows</VcpkgTriplet>
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+    <VcpkgAutoLink>true</VcpkgAutoLink>
+  </PropertyGroup>
+</Project>
