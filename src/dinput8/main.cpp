@@ -1,29 +1,20 @@
 #include <windows.h>
 
+#include "_options.h"
 #include "eqlib.h"
 #include "eqlib/eqgame.h"
+#include "gamma.h"
 #include <mq/base/Detours.h>
+#include "fmt.h"
 
-uintptr_t EQGameBaseAddress = (uintptr_t)GetModuleHandle(nullptr);
-
-
-typedef HRESULT(WINAPI* DirectInput8Create_t)(
-    HINSTANCE, DWORD, REFIID, LPVOID*, LPUNKNOWN
-);
-
-
-
-
-uintptr_t fdebug_addr = FixEQGameOffset(0x808E50);
-FUNCTION_AT_ADDRESS(void, fdebug(const char*, ...), fdebug_addr);
+typedef HRESULT(WINAPI* DirectInput8Create_t)(HINSTANCE, DWORD, REFIID, LPVOID*, LPUNKNOWN);
 
 
 HMODULE realDInput8 = nullptr;
 DirectInput8Create_t real_DirectInput8Create = nullptr;
 
 extern "C" __declspec(dllexport)
-HRESULT WINAPI DirectInput8Create(
-    HINSTANCE hinst, DWORD dwVersion, REFIID riid, LPVOID* ppvOut, LPUNKNOWN punkOuter)
+HRESULT WINAPI DirectInput8Create(HINSTANCE hinst, DWORD dwVersion, REFIID riid, LPVOID* ppvOut, LPUNKNOWN punkOuter)
 {
     if (!realDInput8) {
         char systemPath[MAX_PATH];
@@ -36,17 +27,19 @@ HRESULT WINAPI DirectInput8Create(
         real_DirectInput8Create = (DirectInput8Create_t)GetProcAddress(realDInput8, "DirectInput8Create");
         if (!real_DirectInput8Create) return E_FAIL;
     }
-    OutputDebugStringA("[dinput8 wrapper] DirectInput8Create intercepted\n");
-    fdebug("[eqlib] Test");
+    Println("EQLib Injection Started");
 
+    AttachGammaHook();
+    
     return real_DirectInput8Create(hinst, dwVersion, riid, ppvOut, punkOuter);
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
 {
-    if (ul_reason_for_call != DLL_PROCESS_ATTACH) {
+    if (ul_reason_for_call == DLL_PROCESS_DETACH) {
+        DetachGammaHook();
         DisableThreadLibraryCalls(hModule);
-        OutputDebugStringA("[dinput8 wrapper] DllMain called\n");
+        Println("EQLib Injection Ended");
         return TRUE;
     }
     return TRUE;
